@@ -1,4 +1,4 @@
-package de.itzbund.service.exception;
+package de.itzbund.error;
 
 public class VersionMismatchException extends RuntimeException {
     public VersionMismatchException(final Long id, final Long expected, final Long actual) {

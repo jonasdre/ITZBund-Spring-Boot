@@ -2,8 +2,8 @@ package de.itzbund.service;
 
 import de.itzbund.entity.Buch;
 import de.itzbund.repository.BuchRepository;
-import de.itzbund.service.exception.DuplicateIsbnException;
-import de.itzbund.service.exception.VersionMismatchException;
+import de.itzbund.error.DuplicateIsbnException;
+import de.itzbund.error.VersionMismatchException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

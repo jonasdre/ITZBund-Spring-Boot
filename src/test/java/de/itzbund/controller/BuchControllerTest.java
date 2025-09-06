@@ -1,11 +1,13 @@
 package de.itzbund.controller;
 
 import de.itzbund.entity.Buch;
-import de.itzbund.api.dto.BuchDtos;
+import de.itzbund.error.DuplicateIsbnException;
+import de.itzbund.error.VersionMismatchException;
+import de.itzbund.api.generated.dto.BuchUpdateRequest;
+import de.itzbund.api.generated.dto.BuchResponse;
 import de.itzbund.repository.BuchRepository;
 import de.itzbund.service.BuchService;
-import de.itzbund.service.exception.DuplicateIsbnException;
-import de.itzbund.service.exception.VersionMismatchException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -308,23 +310,24 @@ class BuchControllerTest {
                 Mockito.when(repo.save(any(Buch.class))).thenAnswer(inv -> inv.getArgument(0));
 
                 BuchController controller = new BuchController(realService);
-                BuchDtos.UpdateRequest req = BuchDtos.UpdateRequest.builder()
+                BuchUpdateRequest req = new BuchUpdateRequest()
                         .title("New Title")
                         .author("Author")
                         .isbn("9999999999")
                         .pages(111)
                         .price(BigDecimal.TEN)
-                        .version(1L)
-                        .build();
+                        .version(1L);
 
                 // Act
-                ResponseEntity<BuchDtos.Response> response = controller.update(10L, req);
+                ResponseEntity<BuchResponse> response = controller.update(10L, req);
 
                 // Assert
                 assertEquals(200, response.getStatusCode().value());
                 assertNotNull(response.getBody());
-                assertEquals("New Title", response.getBody().getTitle());
-                assertEquals(111, response.getBody().getPages());
+                BuchResponse body = response.getBody();
+                assertNotNull(body);
+                assertEquals("New Title", body.getTitle());
+                assertEquals(111, body.getPages());
                 // Ensure original entity mutated by lambda
                 assertEquals("New Title", original.getTitle());
                 assertEquals(111, original.getPages());

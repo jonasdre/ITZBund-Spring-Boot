@@ -1,4 +1,4 @@
-package de.itzbund.service.exception;
+package de.itzbund.error;
 
 public class DuplicateIsbnException extends RuntimeException {
     public DuplicateIsbnException(final String isbn) {

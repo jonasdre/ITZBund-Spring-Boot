@@ -1,36 +1,29 @@
 package de.itzbund.api.config;
 
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Konfiguriert die OpenAPI Metadaten der Bücher-API (Titel, Version, Beschreibung, Kontakt).
+ * Konfiguration für OpenAPI/Swagger UI.
+ * Definiert Metadaten für die API-Dokumentation.
  */
 @Configuration
 public class OpenApiConfig {
 
     /**
-     * Erstellt das OpenAPI Objekt für Swagger UI. Nicht zur Erweiterung gedacht.
-     * @return OpenAPI Definition
+     * Konfiguriert die OpenAPI-Spezifikation mit Titel, Version und Beschreibung.
+     * Diese Werte überschreiben die automatisch generierten Metadaten.
+     *
+     * @return OpenAPI-Konfiguration
      */
     @Bean
-    public OpenAPI buecherApi() {
-        Info info = new Info()
-            .title("Bücher API")
-            .version("1.0.0")
-            .description("REST API für Verwaltung und Suche von Büchern.")
-            .contact(new Contact()
-                .name("ITZBund")
-                .email("info@example.org"))
-            .license(new License().name("Proprietary"));
-
+    public OpenAPI customOpenAPI() {
         return new OpenAPI()
-            .components(new Components())
-            .info(info);
+                .info(new Info()
+                        .title("ITZBund Buecher API")
+                        .version("1.0.0")
+                        .description("API zur Verwaltung von Buechern."));
     }
 }

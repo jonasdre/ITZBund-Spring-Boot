@@ -1,0 +1,62 @@
+openapi: 3.0.3
+info:
+  title: ITZBund Buecher API
+  version: 1.0.0
+  description: API zur Verwaltung von Buechern (Demo).
+servers:
+  - url: http://localhost:8080
+paths: {}
+components:
+  schemas:
+    BuchCreateRequest:
+      type: object
+      required: [title, author]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        author:
+          type: string
+          minLength: 1
+          maxLength: 100
+        isbn:
+          type: string
+          pattern: '^[0-9Xx-]{10,17}$'
+        pages:
+          type: integer
+          minimum: 1
+        price:
+          type: number
+          format: bigdecimal
+          minimum: 0.01
+    BuchUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/BuchCreateRequest'
+        - type: object
+          required: [version]
+          properties:
+            version:
+              type: integer
+              format: int64
+              minimum: 0
+    BuchResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        author:
+          type: string
+        isbn:
+          type: string
+        pages:
+          type: integer
+        price:
+          type: number
+          format: bigdecimal
+        version:
+          type: integer
+          format: int64

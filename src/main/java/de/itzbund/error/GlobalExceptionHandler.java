@@ -1,7 +1,4 @@
-package de.itzbund.api.error;
-
-import de.itzbund.service.exception.DuplicateIsbnException;
-import de.itzbund.service.exception.VersionMismatchException;
+package de.itzbund.error;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

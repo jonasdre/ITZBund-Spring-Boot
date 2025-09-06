@@ -1,11 +1,14 @@
 package de.itzbund.controller;
 import jakarta.validation.Valid;
+import de.itzbund.mapper.BuchMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import de.itzbund.entity.Buch;
 import de.itzbund.service.BuchService;
-import de.itzbund.api.dto.BuchDtos;
-import de.itzbund.api.mapper.BuchMapper;
+import de.itzbund.api.generated.dto.BuchCreateRequest;
+import de.itzbund.api.generated.dto.BuchUpdateRequest;
+import de.itzbund.api.generated.dto.BuchResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.net.URI;
@@ -43,13 +46,13 @@ public class BuchController {
             @ApiResponse(
                 responseCode = "201",
                 description = "Buch erstellt",
-                content = @Content(schema = @Schema(implementation = BuchDtos.Response.class))
+                content = @Content(schema = @Schema(implementation = BuchResponse.class))
             ),
             @ApiResponse(responseCode = "400", description = "Validierungsfehler"),
             @ApiResponse(responseCode = "409", description = "ISBN bereits vergeben")
         }
     )
-    public ResponseEntity<BuchDtos.Response> create(@Valid @RequestBody final BuchDtos.CreateRequest req) {
+    public ResponseEntity<BuchResponse> create(@Valid @RequestBody final BuchCreateRequest req) {
         Buch saved = service.save(BuchMapper.toEntity(req));
         LOGGER.info("Buch erstellt id={}", saved.getId());
         return ResponseEntity.created(URI.create("/api/buecher/" + saved.getId()))
@@ -70,7 +73,7 @@ public class BuchController {
             @ApiResponse(responseCode = "404", description = "Nicht gefunden")
         }
     )
-    public ResponseEntity<BuchDtos.Response> get(@PathVariable final Long id) {
+    public ResponseEntity<BuchResponse> get(@PathVariable final Long id) {
         return service.findById(id)
             .map(b -> ResponseEntity.ok(BuchMapper.toResponse(b)))
             .orElse(ResponseEntity.notFound().build());
@@ -87,7 +90,7 @@ public class BuchController {
         summary = "Bücher auflisten / suchen",
         description = "Listet alle Bücher oder filtert optional nach Autor und/oder Titel."
     )
-    public List<BuchDtos.Response> list(@RequestParam(required = false) final String author,
+    public List<BuchResponse> list(@RequestParam(required = false) final String author,
                            @RequestParam(required = false) final String title) {
         List<Buch> books;
         if (author != null && title != null) {
@@ -121,8 +124,8 @@ public class BuchController {
             @ApiResponse(responseCode = "409", description = "ISBN Konflikt")
         }
     )
-    public ResponseEntity<BuchDtos.Response> update(@PathVariable final Long id,
-                                                    @Valid @RequestBody final BuchDtos.UpdateRequest req) {
+    public ResponseEntity<BuchResponse> update(@PathVariable final Long id,
+                                                    @Valid @RequestBody final BuchUpdateRequest req) {
         Buch updated = service.updateWithVersionCheck(
             id,
             req.getVersion(),
