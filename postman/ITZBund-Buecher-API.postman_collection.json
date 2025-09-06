@@ -1,0 +1,277 @@
+{
+    "info": {
+        "name": "ITZBund Spring Boot - Bücher API",
+        "description": "Postman Collection für die Spring Boot Bücher-Verwaltung API\n\nDiese Collection enthält alle verfügbaren REST-Endpunkte für die Bücher-API:\n- Bücher erstellen, abrufen, aktualisieren und löschen\n- Suchfunktionen nach Autor und Titel\n\nBase URL: http://localhost:8080/api/buecher",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_postman_id": "12345678-1234-5678-9012-123456789012"
+    },
+    "item": [
+        {
+            "name": "Bücher verwalten",
+            "item": [
+                {
+                    "name": "Alle Bücher abrufen",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/buecher",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "buecher"]
+                        },
+                        "description": "Ruft alle verfügbaren Bücher ab. Gibt eine Liste von BuchDto-Objekten zurück."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Buch nach ID abrufen",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/buecher/{{buchId}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "buecher", "{{buchId}}"],
+                            "variable": [
+                                {
+                                    "key": "buchId",
+                                    "value": "1",
+                                    "description": "ID des zu abzurufenden Buchs"
+                                }
+                            ]
+                        },
+                        "description": "Ruft ein spezifisches Buch anhand seiner ID ab."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Neues Buch erstellen",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "  const body = pm.response.json();",
+                                    "  pm.collectionVariables.set('buchId', body.id);",
+                                    "  if (body.version !== undefined) { pm.collectionVariables.set('buchVersion', body.version); }",
+                                    "}"],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {"key": "Content-Type", "value": "application/json"},
+                            {"key": "Accept", "value": "application/json"}
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"Spring Boot in Action\",\n    \"author\": \"Craig Walls\",\n    \"isbn\": \"9781617292545\",\n    \"pages\": 472,\n    \"price\": 39.99\n}"
+                        },
+                        "url": {"raw": "{{baseUrl}}/api/buecher", "host": ["{{baseUrl}}"], "path": ["api", "buecher"]},
+                        "description": "Erstellt ein neues Buch. Pflichtfelder: title, author. Optional: isbn (Format-Prüfung), pages (>0), price (>0). Test extrahiert id & version für Folge-Requests."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Buch aktualisieren",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {"exec": ["if (!pm.collectionVariables.get('buchVersion')) { pm.collectionVariables.set('buchVersion', '0'); }"], "type": "text/javascript"}
+                        },
+                        {
+                            "listen": "test",
+                            "script": {"exec": ["if (pm.response.code === 200) { const body = pm.response.json(); pm.collectionVariables.set('buchVersion', body.version); }"], "type": "text/javascript"}
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {"key": "Content-Type", "value": "application/json"},
+                            {"key": "Accept", "value": "application/json"}
+                        ],
+                        "body": {"mode": "raw", "raw": "{\n    \"title\": \"Spring Boot in Action - 2nd Edition\",\n    \"author\": \"Craig Walls\",\n    \"isbn\": \"9781617292545\",\n    \"pages\": 500,\n    \"price\": 45.99,\n    \"version\": {{buchVersion}}\n}"},
+                        "url": {"raw": "{{baseUrl}}/api/buecher/{{buchId}}", "host": ["{{baseUrl}}"], "path": ["api", "buecher", "{{buchId}}"], "variable": [{"key": "buchId", "value": "{{buchId}}", "description": "ID des zu aktualisierenden Buchs"}]},
+                        "description": "Aktualisiert ein bestehendes Buch via Optimistic Locking. Erfordert zusätzlich das Feld version (letzte bekannte Version). Test aktualisiert gespeicherte buchVersion."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Buch löschen",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/buecher/{{buchId}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "buecher", "{{buchId}}"],
+                            "variable": [
+                                {
+                                    "key": "buchId",
+                                    "value": "1",
+                                    "description": "ID des zu löschenden Buchs"
+                                }
+                            ]
+                        },
+                        "description": "Löscht ein Buch anhand seiner ID. Gibt 204 No Content bei Erfolg oder 404 Not Found zurück."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Suchfunktionen",
+            "item": [
+                {
+                    "name": "Bücher nach Autor suchen",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/buecher?author={{authorName}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "buecher"],
+                            "query": [
+                                {
+                                    "key": "author",
+                                    "value": "{{authorName}}",
+                                    "description": "Name des Autors (exakte Übereinstimmung)"
+                                }
+                            ],
+                            "variable": [
+                                {
+                                    "key": "authorName",
+                                    "value": "Craig Walls",
+                                    "description": "Vollständiger Name des Autors"
+                                }
+                            ]
+                        },
+                        "description": "Sucht Bücher nach dem exakten Autorennamen."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Bücher nach Titel suchen",
+                    "request": {"method": "GET", "header": [{"key": "Accept", "value": "application/json"}], "url": {"raw": "{{baseUrl}}/api/buecher?title={{titleSearch}}", "host": ["{{baseUrl}}"], "path": ["api", "buecher"], "query": [{"key": "title", "value": "{{titleSearch}}", "description": "Suchbegriff für den Buchtitel (Teilübereinstimmung, case-insensitive)"}], "variable": [{"key": "titleSearch", "value": "Spring", "description": "Suchbegriff für den Titel"}]}, "description": "Sucht Bücher nach einem Titel-Suchbegriff. Case-insensitive Teilübereinstimmung."},
+                    "response": []
+                },
+                {
+                    "name": "Bücher nach Autor UND Titel suchen",
+                    "request": {"method": "GET", "header": [{"key": "Accept", "value": "application/json"}], "url": {"raw": "{{baseUrl}}/api/buecher?author={{authorName}}&title={{titleSearch}}", "host": ["{{baseUrl}}"], "path": ["api", "buecher"], "query": [{"key": "author", "value": "{{authorName}}"}, {"key": "title", "value": "{{titleSearch}}"}]}, "description": "Kombinierte Suche: exakter Autor UND Titel-Teilstring."},
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Beispiel-Workflows",
+            "item": [
+                {
+                    "name": "Beispiel 1: Java-Buch erstellen",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"Effective Java\",\n    \"author\": \"Joshua Bloch\",\n    \"isbn\": \"9780134685991\",\n    \"pages\": 416,\n    \"price\": 54.99\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/buecher",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "buecher"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Beispiel 2: Microservices-Buch erstellen",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"Microservices Patterns\",\n    \"author\": \"Chris Richardson\",\n    \"isbn\": \"9781617294549\",\n    \"pages\": 520,\n    \"price\": 49.99\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/buecher",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "buecher"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Beispiel 3: Minimales Buch (nur Pflichtfelder)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"Clean Code\",\n    \"author\": \"Robert C. Martin\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/buecher",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "buecher"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8080",
+            "description": "Base URL der Spring Boot Anwendung"
+        },
+        {
+            "key": "buchId",
+            "value": "1",
+            "description": "Standard-ID für Buch-Operationen"
+        },
+        {
+            "key": "authorName",
+            "value": "Craig Walls",
+            "description": "Standard-Autorenname für Suchoperationen"
+        },
+        {
+            "key": "titleSearch",
+            "value": "Spring",
+            "description": "Standard-Suchbegriff für Titel-Suche"
+        }
+    ]
+}

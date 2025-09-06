@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<suppressions>
+    <suppress checks="JavadocType|JavadocMethod|JavadocVariable|MissingJavadocMethod" files=".*Test\.java"/>
+    <suppress checks="JavadocType|JavadocMethod|JavadocVariable|MissingJavadocMethod" files=".*[\\/]target[\\/].*"/>
+    <suppress checks="DesignForExtension" files=".*[\\/](model|dto|entity)[\\/].*\.java"/>
+    <suppress checks="MagicNumber" files=".*Test\.java"/>
+    <suppress checks="VisibilityModifier" files=".*[\\/](model|entity)[\\/].*\.java"/>
+    <suppress checks="FinalParameters" files=".*Controller\.java"/>
+    <suppress checks="JavadocType|MissingJavadocMethod" files="Application\.java"/>
+    <suppress checks="LineLength" message="^Import statement"/>
+    <suppress checks="AvoidStarImport" files=".*Controller\.java"/>
+    <suppress checks="AvoidStarImport" files=".*[\\/](model|entity)[\\/].*\.java"/>
+    <suppress checks="AvoidStarImport" files=".*Test\.java"/>
+    <suppress checks="MethodName" files=".*Test\.java"/>
+    <suppress checks="JavadocVariable|JavadocType|MissingJavadocMethod" files=".*Controller\.java"/>
+    <suppress checks="DesignForExtension" files=".*Controller\.java"/>
+    <suppress checks="HideUtilityClassConstructor" files="Application\.java"/>
+</suppressions>
