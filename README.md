@@ -32,6 +32,7 @@ Die Anwendung bietet ein vollständiges CRUD-System für Bücher:
 **Code-Optimierung:**
 - Lombok zur Reduktion von Boilerplate
 - springdoc-openapi zur automatischen API-Dokumentation (Swagger UI)
+- OpenAPI-Generator für typsichere API-Interfaces (`BuecherApi`) aus YAML-Spezifikation
 
 **Testing & Qualität:**
 - JUnit 5 mit umfassender Test-Suite
@@ -45,22 +46,31 @@ Die Anwendung bietet ein vollständiges CRUD-System für Bücher:
 ```
 src/main/java/de/itzbund/
 ├── Application.java          # Spring Boot Starter
-├── api/
-│   ├── dto/BuchDtos.java     # Create/Update/Response DTOs
-│   ├── mapper/BuchMapper.java# Entity↔DTO Mapping
-│   └── error/GlobalExceptionHandler.java # Zentrale Fehlerbehandlung
+├── config/
+│   └── OpenApiConfig.java    # OpenAPI-Konfiguration für Swagger UI
 ├── controller/
-│   └── BuchController.java   # REST-Endpunkte (/api/buecher)
+│   └── BuchController.java   # REST-Endpunkte (implementiert generierte BuecherApi)
 ├── entity/
 │   └── Buch.java             # JPA Entity (mit @Version für Optimistic Locking)
 ├── service/
 │   ├── BuchService.java      # Geschäftslogik + Duplicate ISBN & Version Check
-│   ├── exception/            # Domänenspezifische Exceptions
+│   └── exception/            # Domänenspezifische Exceptions
 ├── repository/
 │   └── BuchRepository.java   # JPA Repository Interface
+├── mapper/
+│   └── BuchMapper.java       # Entity↔DTO Mapping
+
+src/main/resources/
+└── openapi/
+    └── buecher-api.yaml      # OpenAPI 3.0 Spezifikation
+
+target/generated-sources/openapi/
+└── de/itzbund/api/generated/
+    ├── api/BuecherApi.java   # Generierte API-Schnittstelle
+    └── dto/                  # Generierte DTOs (Request/Response)
 ```
 
-Hinweis: Die API verwendet dedizierte DTOs (`BuchDtos`) für Create/Update/Response um Versionierung (Optimistic Locking via `version` Feld) und Validierungsregeln klar von der Persistenz zu trennen. `@JsonInclude(Include.NON_NULL)` sorgt für schlanke JSON-Antworten.
+Hinweis: Die API verwendet automatisch generierte DTOs aus der OpenAPI-Spezifikation (`buecher-api.yaml`) für typsichere Create/Update/Response-Operationen. Der `BuchController` implementiert die generierte `BuecherApi`-Schnittstelle, was Konsistenz zwischen Dokumentation und Code gewährleistet. `@JsonInclude(Include.NON_NULL)` sorgt für schlanke JSON-Antworten.
 
 ## REST-API Spezifikation
 
@@ -224,6 +234,28 @@ Zusätzlich: Datenbank-Migrationen via Flyway oder Liquibase einführen, Securit
 ## Smoke Test
 
 `SmokeApplicationTest` dient als schneller Integrationsindikator: Start der Applikation, Aufruf der OpenAPI-Dokumentation & Basis-Endpoint. Er erhöht Robustheit bei Refactorings.
+
+## OpenAPI Code-Generierung
+
+Die Anwendung nutzt automatische Code-Generierung:
+
+1. **OpenAPI-Spezifikation** (`src/main/resources/openapi/buecher-api.yaml`) definiert die API
+2. **Maven OpenAPI Generator Plugin** generiert zur Kompilierzeit:
+   - `BuecherApi.java` - Typsichere API-Schnittstelle mit Spring-Annotationen
+   - DTO-Klassen (`BuchCreateRequest`, `BuchUpdateRequest`, `BuchResponse`)
+3. **Controller** implementiert die generierte Schnittstelle
+
+**Vorteile:**
+- Dokumentation und Code sind immer synchron
+- Typsicherheit zwischen API-Definition und Implementierung
+- Automatische Swagger UI Generierung
+- Konsistente Validierungsregeln
+
+**Build-Prozess:**
+```bash
+mvn generate-sources  # Generiert API-Klassen aus YAML
+mvn compile           # Kompiliert inklusive generierter Klassen
+```
 
 ## OpenAPI Hinweise
 Alle relevanten Felder der DTOs erscheinen im Schema. Interne technische Felder können durch DTO-Anpassungen oder Jackson-Annotationen ausgeblendet werden.
