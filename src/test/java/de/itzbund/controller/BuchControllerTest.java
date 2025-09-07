@@ -294,7 +294,6 @@ class BuchControllerTest {
         @Test
         @DisplayName("(Direct) update executes mutator lambda and changes fields")
         void updateLambdaExecuted() {
-                // Arrange: create real service with mocked repository (outside MockMvc layer)
                 BuchRepository repo = Mockito.mock(BuchRepository.class);
                 BuchService realService = new BuchService(repo);
                 Buch original = Buch.builder()
@@ -318,17 +317,14 @@ class BuchControllerTest {
                         .price(BigDecimal.TEN)
                         .version(1L);
 
-                // Act
-                ResponseEntity<BuchResponse> response = controller.update(10L, req);
+                ResponseEntity<BuchResponse> response = controller.updateBuch(10L, req);
 
-                // Assert
                 assertEquals(200, response.getStatusCode().value());
                 assertNotNull(response.getBody());
                 BuchResponse body = response.getBody();
                 assertNotNull(body);
                 assertEquals("New Title", body.getTitle());
                 assertEquals(111, body.getPages());
-                // Ensure original entity mutated by lambda
                 assertEquals("New Title", original.getTitle());
                 assertEquals(111, original.getPages());
         }

@@ -228,7 +228,7 @@
                             <apiPackage>de.itzbund.api.generated.api</apiPackage>
                             <modelPackage>de.itzbund.api.generated.dto</modelPackage>
                             <invokerPackage>de.itzbund.api.generated.invoker</invokerPackage>
-                            <generateApis>false</generateApis>
+                            <generateApis>true</generateApis>
                             <generateApiTests>false</generateApiTests>
                             <generateApiDocumentation>false</generateApiDocumentation>
                             <generateModels>true</generateModels>
@@ -238,6 +238,7 @@
                             <skipValidateSpec>false</skipValidateSpec>
                             <globalProperties>
                                 <models/>
+                                <apis/>
                             </globalProperties>
                             <configOptions>
                                 <dateLibrary>java8</dateLibrary>
@@ -249,6 +250,8 @@
                                 <delegatePattern>false</delegatePattern>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <unhandledException>true</unhandledException>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <useTags>true</useTags>
                             </configOptions>
                         </configuration>
                     </execution>

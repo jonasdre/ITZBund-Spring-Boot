@@ -1,62 +1,249 @@
 openapi: 3.0.3
 info:
-  title: ITZBund Buecher API
+  title: ITZBund Bücher Verwaltung API
   version: 1.0.0
-  description: API zur Verwaltung von Buechern (Demo).
+  description: API zur Verwaltung von Büchern im ITZBund System.
 servers:
   - url: http://localhost:8080
-paths: {}
+tags:
+  - name: Buecher
+    description: Buecher verwalten
+paths:
+  /api/buecher:
+    get:
+      summary: Buecher auflisten / suchen
+      description: Listet alle Buecher oder filtert optional nach Autor und/oder Titel.
+      operationId: listBuecher
+      parameters:
+        - name: author
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optionaler Author-Filter
+        - name: title
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optionaler Titel-Filter
+      responses:
+        '200':
+          description: Liste der Buecher
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BuchResponse'
+      tags:
+        - Buecher
+    post:
+      summary: Neues Buch anlegen
+      description: Erstellt ein neues Buch basierend auf den uebergebenen Feldern.
+      operationId: createBuch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuchCreateRequest'
+      responses:
+        '201':
+          description: Buch erstellt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuchResponse'
+        '400':
+          description: Validierungsfehler
+        '409':
+          description: ISBN bereits vergeben
+      tags:
+        - Buecher
+  /api/buecher/{id}:
+    get:
+      summary: Buch lesen
+      description: Liest ein Buch anhand seiner ID.
+      operationId: getBuch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Buch-ID
+      responses:
+        '200':
+          description: Gefunden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuchResponse'
+        '404':
+          description: Nicht gefunden
+      tags:
+        - Buecher
+    put:
+      summary: Buch aktualisieren
+      description: Aktualisiert ein vorhandenes Buch unter Verwendung von Optimistic Locking.
+      operationId: updateBuch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Buch-ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuchUpdateRequest'
+      responses:
+        '200':
+          description: Aktualisiert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuchResponse'
+        '404':
+          description: Nicht gefunden
+        '409':
+          description: ISBN Konflikt
+        '412':
+          description: Versionskonflikt
+      tags:
+        - Buecher
+    delete:
+      summary: Buch loeschen
+      description: Loescht ein Buch anhand seiner ID.
+      operationId: deleteBuch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Buch-ID
+      responses:
+        '204':
+          description: Geloescht
+        '404':
+          description: Nicht gefunden
+      tags:
+        - Buecher
+
 components:
   schemas:
-    BuchCreateRequest:
-      type: object
-      required: [title, author]
-      properties:
-        title:
-          type: string
-          minLength: 1
-          maxLength: 200
-        author:
-          type: string
-          minLength: 1
-          maxLength: 100
-        isbn:
-          type: string
-          pattern: '^[0-9Xx-]{10,17}$'
-        pages:
-          type: integer
-          minimum: 1
-        price:
-          type: number
-          format: bigdecimal
-          minimum: 0.01
-    BuchUpdateRequest:
-      allOf:
-        - $ref: '#/components/schemas/BuchCreateRequest'
-        - type: object
-          required: [version]
-          properties:
-            version:
-              type: integer
-              format: int64
-              minimum: 0
     BuchResponse:
       type: object
       properties:
         id:
           type: integer
           format: int64
+          description: Die eindeutige Kennung für das Buch
         title:
           type: string
+          maxLength: 200
+          description: Der Titel des Buches
         author:
           type: string
+          maxLength: 100
+          description: Der Autor des Buches
         isbn:
           type: string
+          maxLength: 17
+          pattern: '[0-9Xx-]{10,17}'
+          description: Die ISBN-Nummer des Buches
         pages:
           type: integer
+          minimum: 1
+          description: Die Anzahl der Seiten im Buch
         price:
           type: number
-          format: bigdecimal
+          format: decimal
+          minimum: 0.01
+          description: Der Preis des Buches
         version:
           type: integer
           format: int64
+          description: Optimistische Locking Spalte
+      required:
+        - id
+        - title
+        - author
+        - pages
+        - price
+        - version
+
+    BuchCreateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          description: Der Titel des Buches
+        author:
+          type: string
+          maxLength: 100
+          description: Der Autor des Buches
+        isbn:
+          type: string
+          maxLength: 17
+          pattern: '[0-9Xx-]{10,17}'
+          description: Die ISBN-Nummer des Buches
+        pages:
+          type: integer
+          minimum: 1
+          description: Die Anzahl der Seiten im Buch
+        price:
+          type: number
+          format: decimal
+          minimum: 0.01
+          description: Der Preis des Buches
+      required:
+        - title
+        - author
+        - pages
+        - price
+
+    BuchUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          description: Der Titel des Buches
+        author:
+          type: string
+          maxLength: 100
+          description: Der Autor des Buches
+        isbn:
+          type: string
+          maxLength: 17
+          pattern: '[0-9Xx-]{10,17}'
+          description: Die ISBN-Nummer des Buches
+        pages:
+          type: integer
+          minimum: 1
+          description: Die Anzahl der Seiten im Buch
+        price:
+          type: number
+          format: decimal
+          minimum: 0.01
+          description: Der Preis des Buches
+        version:
+          type: integer
+          format: int64
+          description: Optimistische Locking Spalte (erforderlich für Optimistic Locking)
+      required:
+        - title
+        - author
+        - pages
+        - price
+        - version
